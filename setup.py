@@ -8,7 +8,7 @@ __version__ = "0.0.0"
 
 REPO_NAME = "Kidney-Disease-Classification"
 AUTHOR_USER_NAME = "Salanky"
-SRC_REPO = "cnnClassifier"
+SRC_REPO = "cnnClassifier" #local package name
 AUTHOR_EMAIL = "titque1107@gmail.com"
 
 
