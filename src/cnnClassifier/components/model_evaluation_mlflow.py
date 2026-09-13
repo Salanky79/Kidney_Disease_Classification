@@ -16,7 +16,7 @@ class Evaluation:
 
     def _valid_generator(self):
         datagenerator_kwargs = dict(
-            rescale=1./255,
+            preprocessing_function=tf.keras.applications.resnet50.preprocess_input,
             validation_split=0.20  # Đã đồng bộ 0.20 với model_training.py
         )
 
@@ -48,6 +48,8 @@ class Evaluation:
         # 1. Tính Loss & Accuracy cơ bản
         self.score = self.model.evaluate(self.valid_generator)
 
+        self.valid_generator.reset()
+        
         # 2. Chạy predict để lấy nhãn dự đoán và tính Precision, Recall, F1
         predictions = self.model.predict(self.valid_generator)
         y_pred = np.argmax(predictions, axis=1)
