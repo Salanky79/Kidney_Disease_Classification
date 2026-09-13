@@ -19,7 +19,7 @@ class Training:
     def train_valid_generator(self):
         datagenerator_kwargs = dict(
             rescale=1./255,
-            validation_split=0.30
+            validation_split=0.20  # Dành 80% dữ liệu cho train để fine-tune tốt hơn
         )
 
         dataflow_kwargs = dict(
@@ -41,11 +41,11 @@ class Training:
 
         if self.config.params_is_augmentation:
             train_datagenerator = tf.keras.preprocessing.image.ImageDataGenerator(
-                rotation_range=40,
+                rotation_range=20,       # Giảm xoay xuống 20 độ tránh làm biến dạng góc cắt CT
                 horizontal_flip=True,
-                width_shift_range=0.2,
-                height_shift_range=0.2,
-                shear_range=0.2,
+                width_shift_range=0.1,
+                height_shift_range=0.1,
+                shear_range=0.1,
                 zoom_range=0.2,
                 **datagenerator_kwargs
             )
@@ -59,11 +59,10 @@ class Training:
             **dataflow_kwargs
         )
 
-        # In thứ tự ánh xạ 4 nhãn bệnh ra Terminal
         print(f"\n[INFO] Class Mapping: {self.train_generator.class_indices}\n")
 
     @staticmethod
-    def save_model(path: Path, model: tf.keras.Model):
+    def save_model(path: Path, model: tf.keras.models.Model):
         model.save(path)
 
     def train(self):

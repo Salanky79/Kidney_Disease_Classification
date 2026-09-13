@@ -17,7 +17,7 @@ class Evaluation:
     def _valid_generator(self):
         datagenerator_kwargs = dict(
             rescale=1./255,
-            validation_split=0.30
+            validation_split=0.20  # Đã đồng bộ 0.20 với model_training.py
         )
 
         dataflow_kwargs = dict(
@@ -70,7 +70,6 @@ class Evaluation:
         save_json(path=Path("scores.json"), data=scores)
 
     def log_into_mlflow(self):
-        # 1. Cấu hình URI và xác thực
         os.environ["MLFLOW_TRACKING_URI"] = self.config.mlflow_uri
         os.environ["MLFLOW_TRACKING_USERNAME"] = "Salanky79"
         os.environ["MLFLOW_TRACKING_PASSWORD"] = "e6fee255f15d712adf3a3d40f9ae781f114f1dd7"
@@ -78,7 +77,6 @@ class Evaluation:
         mlflow.set_tracking_uri(self.config.mlflow_uri)
         mlflow.set_registry_uri(self.config.mlflow_uri)
 
-        # 2. Đặt tên Experiment cụ thể để khắc phục lỗi DagsHub
         mlflow.set_experiment("Kidney_Disease_Classification")
 
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
