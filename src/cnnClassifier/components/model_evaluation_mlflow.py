@@ -5,7 +5,7 @@ import numpy as np
 import tensorflow as tf
 import mlflow
 import mlflow.keras
-from sklearn.metrics import precision_score, recall_score, f1_score
+from sklearn.metrics import precision_score, recall_score, f1_score, classification_report
 from cnnClassifier.entity.config_entity import EvaluationConfig
 from cnnClassifier.utils.common import save_json
 
@@ -17,7 +17,7 @@ class Evaluation:
     def _valid_generator(self):
         datagenerator_kwargs = dict(
             preprocessing_function=tf.keras.applications.resnet50.preprocess_input,
-            validation_split=0.20  # Đã đồng bộ 0.20 với model_training.py
+            validation_split=0.20
         )
 
         dataflow_kwargs = dict(
@@ -50,14 +50,25 @@ class Evaluation:
 
         self.valid_generator.reset()
         
-        # 2. Chạy predict để lấy nhãn dự đoán và tính Precision, Recall, F1
+        # 2. Chạy predict để lấy nhãn dự đoán
         predictions = self.model.predict(self.valid_generator)
         y_pred = np.argmax(predictions, axis=1)
         y_true = self.valid_generator.classes
 
+        # 3. Tính các chỉ số tổng quan
         self.precision = float(precision_score(y_true, y_pred, average='macro', zero_division=0))
         self.recall = float(recall_score(y_true, y_pred, average='macro', zero_division=0))
         self.f1_score = float(f1_score(y_true, y_pred, average='macro', zero_division=0))
+
+        # 4. In Classification Report chi tiết từng lớp ra Terminal
+        target_names = list(self.valid_generator.class_indices.keys())
+        self.report_str = classification_report(
+            y_true, y_pred, target_names=target_names, digits=4, zero_division=0
+        )
+        
+        print("\n" + "="*20 + " CLASSIFICATION REPORT " + "="*20)
+        print(self.report_str)
+        print("="*63 + "\n")
 
         self.save_score()
 
@@ -92,6 +103,9 @@ class Evaluation:
                 "recall": self.recall,
                 "f1_score": self.f1_score
             })
+
+            # Đẩy file classification_report.txt lên MLflow Artifacts
+            mlflow.log_text(self.report_str, artifact_file="classification_report.txt")
 
             if tracking_url_type_store != "file":
                 mlflow.keras.log_model(self.model, "model", registered_model_name="ResNet50Model")

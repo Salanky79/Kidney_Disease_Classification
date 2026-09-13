@@ -7,11 +7,11 @@ stages:
     outs:
       - artifacts/data_ingestion/CT-KIDNEY-DATASET-Normal-Cyst-Tumor-Stone
 
-
   prepare_base_model:
     cmd: python src/cnnClassifier/pipeline/stage_02_prepare_base_model.py
     deps:
       - src/cnnClassifier/pipeline/stage_02_prepare_base_model.py
+      - src/cnnClassifier/components/prepare_base_model.py
       - config/config.yaml
     params:
       - IMAGE_SIZE
@@ -22,11 +22,11 @@ stages:
     outs:
       - artifacts/prepare_base_model
 
-
   training:
     cmd: python src/cnnClassifier/pipeline/stage_03_model_training.py
     deps:
       - src/cnnClassifier/pipeline/stage_03_model_training.py
+      - src/cnnClassifier/components/model_training.py
       - config/config.yaml
       - artifacts/data_ingestion/CT-KIDNEY-DATASET-Normal-Cyst-Tumor-Stone
       - artifacts/prepare_base_model
@@ -38,11 +38,11 @@ stages:
     outs:
       - artifacts/training/model.h5
 
-
   evaluation:
     cmd: python src/cnnClassifier/pipeline/stage_04_model_evaluation.py
     deps:
       - src/cnnClassifier/pipeline/stage_04_model_evaluation.py
+      - src/cnnClassifier/components/model_evaluation_mlflow.py
       - config/config.yaml
       - artifacts/data_ingestion/CT-KIDNEY-DATASET-Normal-Cyst-Tumor-Stone
       - artifacts/training/model.h5
