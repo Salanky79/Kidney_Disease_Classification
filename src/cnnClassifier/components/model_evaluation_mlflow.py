@@ -39,10 +39,19 @@ class Evaluation:
 
     @staticmethod
     def load_model(path: Path) -> tf.keras.Model:
-        return tf.keras.models.load_model(path)
+        # BỔ SUNG compile=False ĐỂ BỎ QUA CUSTOM LOSS KHÔNG TỒN TẠI TRONG KO-GIỜ-SỢ-LỖI
+        return tf.keras.models.load_model(path, compile=False)
 
     def evaluation(self):
         self.model = self.load_model(self.config.path_of_model)
+        
+        # COMPILE LAI MÔ HÌNH VỚI LOSS TIÊU CHUẨN ĐỂ CHẠY HÀM evaluate()
+        self.model.compile(
+            optimizer=tf.keras.optimizers.Adam(),
+            loss=tf.keras.losses.CategoricalCrossentropy(),
+            metrics=["accuracy"]
+        )
+        
         self._valid_generator()
         
         # 1. Tính Loss & Accuracy cơ bản
